@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Section 2 · Lecture 3 Quiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .hidden{display:none}
+    .option-disabled{opacity:.6;cursor:default}
+    .option-correct{background:#dcfce7;border-color:#16a34a!important}
+    .option-wrong{background:#fee2e2;border-color:#dc2626!important}
+    .option-neutral{background:#f9fafb;border-color:#e5e7eb!important}
+  </style>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+  <div class="w-full max-w-2xl">
+    <div class="bg-white shadow-xl rounded-2xl p-6 md:p-8">
+      <div class="flex flex-col gap-2 mb-6">
+        <h1 class="text-xl font-semibold text-gray-900">Section 2 • Lecture 3 — Sales Tactics Quiz</h1>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <div id="question-count">Question 1 / 6</div>
+          <div>Score: <span id="score-temp">0</span></div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div id="progress" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <p id="qtext" class="text-lg font-medium text-gray-900 mb-6"></p>
+      <div id="opts" class="flex flex-col gap-3 mb-6"></div>
+
+      <div class="flex items-center justify-between">
+        <button id="prev" class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed">← Back</button>
+        <button id="next" class="px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white shadow hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed">Next →</button>
+      </div>
+
+      <div id="results" class="hidden mt-10 border-t pt-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">Your Result</h2>
+        <p class="text-gray-700 mb-4">Score: <span id="final"></span></p>
+        <div class="text-sm text-gray-500 mb-4">Green = correct. Red = your wrong choice (if any).</div>
+        <div id="review" class="space-y-6"></div>
+        <div class="mt-8 flex gap-3">
+          <button id="restart" class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200">Restart quiz</button>
+          <button id="top" class="px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white shadow hover:bg-indigo-700">Back to top ↑</button>
+        </div>
+      </div>
+    </div>
+    <p class="text-center text-[11px] text-gray-400 mt-4">Practice quiz — not graded by Udemy.</p>
+  </div>
+
+  <script>
+    // ====== QUIZ DATA (from your screenshots) ======
+    const quiz = [
+      {
+        text: "According to the video, what is the primary difference between an upsell and a cross-sell?",
+        options: [
+          {
+            text: "An upsell is offering a premium version of what the customer already wants, while a cross-sell adds a complementary item to the purchase.",
+            isCorrect: true,
+            feedbackTitle: "That's right!",
+            feedbackBody: "This correctly distinguishes between upgrading the core purchase and adding an accessory or related product."
+          },
+          {
+            text: "An upsell and a cross-sell are two terms for the same strategy: convincing a customer to spend more money.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "They are different: upsell = better version; cross-sell = additional complementary item."
+          },
+          {
+            text: "An upsell involves adding a related but separate item, while a cross-sell is about offering a more premium version of the original item.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "That description reverses the definitions."
+          },
+          {
+            text: "An upsell is a discount for buying in bulk, whereas a cross-sell involves adding a free service to the purchase.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "Bulk discounts/free services are not the core definitions used here."
+          }
+        ],
+        explanation: "Upsell = upgrade the same product. Cross-sell = add a complementary product/service."
+      },
+      {
+        text: "What is described as a critical factor for the 'buy more incentive' tactic to be effective?",
+        options: [
+          {
+            text: "The customer must be shown complex math to prove they are getting a good deal.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "The emphasis is on speed and professionalism, not complex calculations."
+          },
+          {
+            text: "This offer should only be presented to customers who are hesitant to make a purchase.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "It can work widely; the key is being able to offer it instantly."
+          },
+          {
+            text: "The sales team must have pre-approved pricing rules to make offers without delay.",
+            isCorrect: true,
+            feedbackTitle: "That's right!",
+            feedbackBody: "Needing to ask a manager breaks momentum and looks unprofessional. Pre-approval keeps the sale moving."
+          },
+          {
+            text: "A manager must personally approve every bulk discount to prevent financial losses.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "That causes delays—the opposite of what the tactic needs."
+          }
+        ],
+        explanation: "Pre-approved tiers let reps act immediately, preserving momentum."
+      },
+      {
+        text: "How does the 'power of free' tactic, as explained in the video, help a business gain a competitive advantage?",
+        options: [
+          {
+            text: "By offering free, unrelated gifts that surprise and delight the customer.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "Random freebies don’t build strategic value."
+          },
+          {
+            text: "By giving away the main product for free to attract new customers.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "The point is a valuable service, not the core product for free."
+          },
+          {
+            text: "By creating a 'buy one, get one free' offer to clear out old inventory.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "BOGO is different from providing a differentiating free service."
+          },
+          {
+            text: "By offering a valuable, free service that competitors do not provide.",
+            isCorrect: true,
+            feedbackTitle: "That's right!",
+            feedbackBody: "Example: free home measurements — a service that builds loyalty and makes the choice a 'no-brainer'."
+          }
+        ],
+        explanation: "A thoughtful free service adds real value and separates you from competitors."
+      },
+      {
+        text: "What is the key psychological principle behind the 'tiered packaging' tactic, using the fast-food drink example?",
+        options: [
+          {
+            text: "It overwhelms the customer with choices, leading them to pick the cheapest one.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "The tactic frames value so the larger option feels attractive, not overwhelming."
+          },
+          {
+            text: "It encourages customers to choose the middle option as a safe compromise.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "Decoy effects can do that, but here the highlight is the perceived bargain of the largest size."
+          },
+          {
+            text: "It creates a feeling of being tricked, which makes customers less likely to buy any option.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "The goal is perceived value, not suspicion."
+          },
+          {
+            text: "It makes the largest option seem like an incredible bargain for a tiny additional cost over the medium option.",
+            isCorrect: true,
+            feedbackTitle: "That's right!",
+            feedbackBody: "A small price jump makes the large size appear to be the most logical, value-based choice."
+          }
+        ],
+        explanation: "Presenting tiers shifts perception so a higher tier feels like a smart bargain."
+      },
+      {
+        text: "What common theme connects all four of the sales tactics discussed?",
+        options: [
+          {
+            text: "They all depend on offering the absolute lowest price in the market.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "The focus is value psychology, not racing to the bottom."
+          },
+          {
+            text: "They are complicated strategies that require a complete overhaul of a business's products.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "They’re simple to implement with the right framing."
+          },
+          {
+            text: "They are built on understanding customer psychology to frame an offer as irresistible.",
+            isCorrect: true,
+            feedbackTitle: "Right answer",
+            feedbackBody: "The intro stresses understanding the customer’s mind and using psychologically driven tactics."
+          },
+          {
+            text: "They are universal tactics that must be applied exactly as described to work for any business.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "The video suggests you can 'take these strategies, tweak them, and make them work for your specific business'."
+          }
+        ],
+        explanation: "Each tactic relies on psychology and framing, not rigid scripts."
+      },
+      {
+        text: "In the suggested five-step plan for implementing these tactics, what is the recommended second step?",
+        options: [
+          {
+            text: "Define crystal clear prices for all the new offers you plan to make.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "Pricing clarity matters, but it’s not step two."
+          },
+          {
+            text: "Empower your entire team to go out and make the sales.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "Team enablement comes later, after you pick your focus."
+          },
+          {
+            text: "Pick only one of the tactics to start with.",
+            isCorrect: true,
+            feedbackTitle: "Right answer",
+            feedbackBody: "Don’t try to do everything at once. Start with a single, focused tactic."
+          },
+          {
+            text: "Test and measure the results of your new sales strategy.",
+            isCorrect: false,
+            feedbackTitle: "Not quite",
+            feedbackBody: "Testing is the final, ongoing step to refine the process."
+          }
+        ],
+        explanation: "Focus prevents overwhelm. Start with one tactic, then expand based on results."
+      }
+    ];
+
+    // ====== QUIZ ENGINE ======
+    let i = 0;
+    const chosen = Array(quiz.length).fill(null);
+    const locked = Array(quiz.length).fill(false);
+
+    const qtext = document.getElementById("qtext");
+    const opts = document.getElementById("opts");
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    const progress = document.getElementById("progress");
+    const qcount = document.getElementById("question-count");
+    const scoreTemp = document.getElementById("score-temp");
+
+    const results = document.getElementById("results");
+    const finalEl = document.getElementById("final");
+    const review = document.getElementById("review");
+    const restart = document.getElementById("restart");
+    const topBtn = document.getElementById("top");
+
+    function tempScore(){
+      return chosen.reduce((s, c, idx)=> s + (c!==null && quiz[idx].options[c].isCorrect ? 1:0), 0);
+    }
+
+    function render(){
+      const q = quiz[i];
+      qtext.textContent = q.text;
+      qcount.textContent = `Question ${i+1} / ${quiz.length}`;
+      progress.style.width = (i/quiz.length*100) + "%";
+      scoreTemp.textContent = `${tempScore()} / ${quiz.length}`;
+
+      const isLocked = locked[i];
+      const picked = chosen[i];
+
+      opts.innerHTML = "";
+      q.options.forEach((o, idx)=>{
+        let cls = "block w-full text-left border rounded-xl p-4 text-gray-800 transition relative";
+        if(!isLocked){
+          cls += " cursor-pointer hover:bg-indigo-50 hover:border-indigo-400";
+          cls += picked===idx ? " border-indigo-500 bg-indigo-50" : " border-gray-300 bg-white";
+        }else{
+          if(o.isCorrect && picked===idx) cls += " option-correct border-2";
+          else if(!o.isCorrect && picked===idx) cls += " option-wrong border-2";
+          else if(o.isCorrect) cls += " option-correct border";
+          else cls += " option-neutral border";
+          cls += " option-disabled";
+        }
+
+        const btn = document.createElement("button");
+        btn.className = cls;
+        btn.disabled = isLocked;
+        btn.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="font-semibold ${isLocked ? (o.isCorrect ? 'text-green-700' : (picked===idx ? 'text-red-700' : 'text-gray-500')) : 'text-indigo-600'}">
+              ${String.fromCharCode(65+idx)}.
+            </div>
+            <div class="flex-1 text-left text-[15px] leading-relaxed text-gray-900">${o.text}</div>
+          </div>
+        `;
+        if(!isLocked){
+          btn.addEventListener("click", ()=>{
+            chosen[i]=idx; locked[i]=true; render();
+          });
+        }
+        opts.appendChild(btn);
+
+        if(isLocked){
+          const userWrong = picked!==null && !q.options[picked].isCorrect;
+          if(picked===idx || (o.isCorrect && userWrong)){
+            const fb = document.createElement("div");
+            fb.className = "mt-3 text-sm leading-relaxed rounded-xl border p-3 " + (o.isCorrect ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800");
+            fb.innerHTML = `
+              <div class="font-semibold mb-1 flex items-center gap-2">
+                <span>${o.feedbackTitle || (o.isCorrect ? "Correct" : "Not quite")}</span>
+                ${o.isCorrect ? '<span class="text-green-600">✓</span>' : '<span class="text-red-600">✕</span>'}
+              </div>
+              <div class="text-[13px]">${o.feedbackBody || ""}</div>
+            `;
+            opts.appendChild(fb);
+          }
+        }
+      });
+
+      prev.disabled = i===0;
+      next.textContent = i===quiz.length-1 ? "Finish ✔" : "Next →";
+      results.classList.add("hidden");
+    }
+
+    function renderResults(){
+      finalEl.textContent = `${tempScore()} / ${quiz.length}`;
+      progress.style.width = "100%";
+      review.innerHTML = "";
+      quiz.forEach((q, qi)=>{
+        const card = document.createElement("div");
+        card.className = "border border-gray-200 rounded-xl p-4";
+        const title = document.createElement("div");
+        title.className = "text-base font-semibold text-gray-900 mb-2";
+        title.textContent = `${qi+1}. ${q.text}`;
+        card.appendChild(title);
+
+        q.options.forEach((o, oi)=>{
+          let c = "block w-full text-left border rounded-xl p-3 text-sm mb-2";
+          if(o.isCorrect && chosen[qi]===oi) c += " option-correct border-2";
+          else if(o.isCorrect) c += " option-correct border";
+          else if(!o.isCorrect && chosen[qi]===oi) c += " option-wrong border-2";
+          else c += " border-gray-300 bg-white";
+          const row = document.createElement("div");
+          row.className = c;
+          row.innerHTML = `<div class="flex items-start gap-2"><div class="font-semibold">${String.fromCharCode(65+oi)}.</div><div class="flex-1">${o.text}</div></div>`;
+          card.appendChild(row);
+        });
+
+        if(q.explanation){
+          const exp = document.createElement("div");
+          exp.className = "mt-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-3";
+          exp.innerHTML = "<span class='font-semibold text-gray-900'>Why this matters:</span> " + q.explanation;
+          card.appendChild(exp);
+        }
+
+        review.appendChild(card);
+      });
+      results.classList.remove("hidden");
+      results.scrollIntoView({behavior:"smooth"});
+    }
+
+    // events
+    next.addEventListener("click", ()=>{
+      if(i===quiz.length-1) { renderResults(); return; }
+      i++; render();
+    });
+    prev.addEventListener("click", ()=>{ if(i>0){ i--; render(); }});
+    document.getElementById("restart").addEventListener("click", ()=>{
+      for(let k=0;k<quiz.length;k++){ chosen[k]=null; locked[k]=false; }
+      i=0; window.scrollTo({top:0,behavior:"smooth"}); render();
+    });
+    document.getElementById("top").addEventListener("click", ()=> window.scrollTo({top:0,behavior:"smooth"}));
+
+    // init
+    render();
+  </script>
+</body>
+</html>
