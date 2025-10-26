@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lecture 2 Quiz: Perfect Reply Formula</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .hidden { display: none; }
+
+    /* locked (after user picks) */
+    .option-disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    /* correct answer style */
+    .option-correct {
+      background-color: #dcfce7;        /* light green */
+      border-color: #16a34a !important; /* green border */
+    }
+
+    /* wrong chosen answer style */
+    .option-wrong {
+      background-color: #fee2e2;        /* light red */
+      border-color: #dc2626 !important; /* red border */
+    }
+
+    /* neutral options after lock */
+    .option-neutral {
+      background-color: #f9fafb;        /* light gray */
+      border-color: #e5e7eb !important; /* gray border */
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+  <div class="w-full max-w-2xl">
+    <!-- QUIZ CARD -->
+    <div class="bg-white shadow-xl rounded-2xl p-6 md:p-8">
+      <!-- HEADER -->
+      <div id="quiz-header" class="flex flex-col gap-2 mb-6">
+        <h1 class="text-xl font-semibold text-gray-900" id="quiz-title">
+          Lecture 2 • Perfect Reply Formula • Self-Test
+        </h1>
+
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <div id="question-count">Question 1 / 10</div>
+
+          <div id="score-temp" class="text-right">
+            Score so far:
+            <span id="score-temp-number">0</span>
+          </div>
+        </div>
+
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div id="progress-bar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- QUESTION TEXT -->
+      <div id="question-area" class="mb-6">
+        <p id="question-text" class="text-lg font-medium text-gray-900 leading-relaxed"></p>
+      </div>
+
+      <!-- OPTIONS go here -->
+      <div id="options-area" class="flex flex-col gap-3 mb-6">
+        <!-- injected -->
+      </div>
+
+      <!-- NAV BUTTONS -->
+      <div class="flex items-center justify-between">
+        <button
+          id="prev-btn"
+          class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          ← Back
+        </button>
+
+        <button
+          id="next-btn"
+          class="px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white shadow hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          Next →
+        </button>
+      </div>
+
+      <!-- RESULTS SECTION -->
+      <div id="results-section" class="hidden mt-10 border-t pt-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">
+          Your Result
+        </h2>
+
+        <p class="text-gray-700 mb-4">
+          Score:
+          <span class="font-bold text-indigo-600" id="final-score"></span>
+        </p>
+
+        <div class="text-sm text-gray-500 mb-4">
+          Green = correct answer. Red = what you chose if it was wrong.
+        </div>
+
+        <div id="review-area" class="space-y-6">
+          <!-- injected detailed review -->
+        </div>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <button
+            id="restart-btn"
+            class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200"
+          >
+            Restart quiz
+          </button>
+
+          <button
+            id="scroll-top-btn"
+            class="px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white shadow hover:bg-indigo-700"
+          >
+            Back to top ↑
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTNOTE -->
+    <p class="text-center text-[11px] text-gray-400 mt-4">
+      This quiz is for practice only. It is not graded by Udemy.
+    </p>
+  </div>
+
+  <script>
+    /**********************************************************
+     * QUIZ DATA
+     *
+     * Each question has:
+     *  text:           question text
+     *  options: [
+     *    {
+     *      text:          answer text,
+     *      isCorrect:     true / false,
+     *      feedbackTitle: short label ("That's right!", "Not quite", etc),
+     *      feedbackBody:  explanation text for that option
+     *    }, ...
+     *  ]
+     *  explanation:  high-level summary for final review
+     **********************************************************/
+
+    const quizData = [
+      {
+        text: `What are the four components of the 'Perfect Reply Formula' in the correct sequence?`,
+        options: [
+          {
+            text: `Additional Offer, Greeting, Direct Answer, Call to Action`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `This order tries to sell before building trust. The formula does not start with the upsell.`
+          },
+          {
+            text: `Greeting, Call to Action, Direct Answer, Additional Offer`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `CTA this early feels pushy. You shouldn't ask them to act before you even answer their question.`
+          },
+          {
+            text: `Direct Answer, Additional Offer, Greeting, Call to Action`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `You skipped the human connection first. You can't answer and upsell before even greeting them.`
+          },
+          {
+            text: `Greeting, Direct Answer, Additional Offer, Call to Action`,
+            isCorrect: true,
+            feedbackTitle: `That's right!`,
+            feedbackBody: `This sequence starts with a human connection, provides the requested information directly, adds value, and then keeps the conversation moving forward.`
+          }
+        ],
+        explanation: `Correct order is: Greeting → Direct Answer → Additional Offer → Call to Action. You build connection first, answer clearly, add value, then guide the next step.`
+      },
+
+      {
+        text: `According to the video, what is the recommended method for sending the messages that make up the 'Perfect Reply Formula'?`,
+        options: [
+          {
+            text: `Send the Greeting and Direct Answer together, then the Offer and CTA together.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Bundling steps still sounds scripted. You lose the natural back-and-forth.`
+          },
+          {
+            text: `Use a voice note to deliver the entire four-step reply.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `The advice focuses on the pacing of typed messages, not replacing it with one long voice note.`
+          },
+          {
+            text: `Combine all four steps into a single, comprehensive paragraph.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `One giant block looks like copy/paste and kills the conversation.`
+          },
+          {
+            text: `Send each of the four steps as a separate, individual message.`,
+            isCorrect: true,
+            feedbackTitle: `That's right!`,
+            feedbackBody: `This method creates a natural back-and-forth rhythm, making the interaction feel like a real-time conversation rather than a pre-written script.`
+          }
+        ],
+        explanation: `Sending each step as its own short message feels human. It keeps the chat alive instead of looking like spam.`
+      },
+
+      {
+        text: `Which step of the formula is described as the 'secret weapon' that helps a business stand out from its competitors?`,
+        options: [
+          {
+            text: `The Call to Action`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `The CTA pushes the next step, but it's not what makes you unique.`
+          },
+          {
+            text: `The Greeting`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Greeting builds basic trust, but it's not the 'secret weapon' against competitors.`
+          },
+          {
+            text: `The Additional Offer`,
+            isCorrect: true,
+            feedbackTitle: `That's right!`,
+            feedbackBody: `This is the moment to provide extra value, like a smart bundle or deal, answering the unasked question of 'Why should I buy from you?'.`
+          },
+          {
+            text: `The Direct Answer`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Direct Answer builds trust, but the 'secret weapon' is the extra value you add.`
+          }
+        ],
+        explanation: `The 'Additional Offer' is where you add unique value (bundle, bonus, upgrade). That’s what separates you from every other seller.`
+      },
+
+      {
+        text: `What is the primary psychological reason for giving a 'Direct Answer' immediately after the greeting?`,
+        options: [
+          {
+            text: `It demonstrates superior product knowledge.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Expertise helps, but the lesson says the key reason is trust, not just showing knowledge.`
+          },
+          {
+            text: `It builds trust by showing you are not being evasive.`,
+            isCorrect: true,
+            feedbackTitle: `Right answer`,
+            feedbackBody: `Avoiding the customer's question to ask one of your own is seen as a trust-breaking behavior; being direct does the opposite.`
+          },
+          {
+            text: `It filters out customers who are not serious about buying.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Filtering buyers is not the main point here. The focus is building trust.`
+          },
+          {
+            text: `It saves time for both the customer and the salesperson.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `While it may be efficient, the main reason cited is psychological, not purely about time management.`
+          }
+        ],
+        explanation: `Giving a direct answer right away proves you're honest and not playing games. That honesty creates trust fast.`
+      },
+
+      {
+        text: `What is the main purpose of the 'Call to Action' (CTA) as described in the video?`,
+        options: [
+          {
+            text: `To give the customer a clear, easy next step and keep the conversation going.`,
+            isCorrect: true,
+            feedbackTitle: `That's right!`,
+            feedbackBody: `Its job is to prevent the conversation from dying out by providing a simple way for the customer to re-engage.`
+          },
+          {
+            text: `To gather the customer's contact information for a marketing list.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Collecting contacts is marketing admin. CTA here is about keeping the chat alive right now.`
+          },
+          {
+            text: `To close the sale immediately.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `The CTA is not 'buy now'. It's 'let's keep talking'.`
+          },
+          {
+            text: `To summarize the benefits of the additional offer.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Summarizing value is part of the offer step, not the CTA step.`
+          }
+        ],
+        explanation: `The CTA's real job: keep the chat from going silent by giving the buyer an easy next move.`
+      },
+
+      {
+        text: `According to the transcript, why is it a mistake to send all four steps as one giant 'wall of text'?`,
+        options: [
+          {
+            text: `It seems automated, impersonal, and kills the conversation.`,
+            isCorrect: true,
+            feedbackTitle: `That's right!`,
+            feedbackBody: `This formatting screams 'copied-and-pasted script,' which makes the customer's brain 'short-circuit' and leads to them getting ghosted.`
+          },
+          {
+            text: `It uses too much data for customers on limited mobile plans.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Data use was never the real problem. The problem is psychological.`
+          },
+          {
+            text: `It requires the customer to scroll too much on their device.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Scrolling is not the main issue. The issue is that it feels inhuman and scripted.`
+          },
+          {
+            text: `It is difficult for the salesperson to type correctly.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Typing difficulty is not the reason given.`
+          }
+        ],
+        explanation: `Huge 'wall of text' feels like spam, not conversation. When it feels robotic, they ghost you.`
+      },
+
+      {
+        text: `In which of the following situations would it be most appropriate to skip the 'Additional Offer' step?`,
+        options: [
+          {
+            text: `A customer asks about the features of a specific service.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Here you can still add value by recommending the right version or bundle.`
+          },
+          {
+            text: `A customer sends a DM saying, 'Tell me more about product X.'`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `They're already interested in product X. You can attach a helpful upgrade or bundle.`
+          },
+          {
+            text: `A customer asks for the price of your most popular product.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Price questions are perfect moments to position a bundle, warranty, or add-on.`
+          },
+          {
+            text: `A customer asks, 'What time do you close today?'`,
+            isCorrect: true,
+            feedbackTitle: `That's right!`,
+            feedbackBody: `Trying to shoehorn a product bundle into a simple logistical question would feel weird and overly salesy, breaking the natural flow.`
+          }
+        ],
+        explanation: `If the question is ONLY logistics (example: 'What time do you close?'), don't force an upsell. You'd sound desperate.`
+      },
+
+      {
+        text: `Using a question like 'So, what will you be using this for?' as a CTA changes the salesperson's role from a seller to what?`,
+        options: [
+          {
+            text: `An order taker`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `An order taker is passive. This CTA makes you more active and valuable.`
+          },
+          {
+            text: `A manager`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `A 'manager' sounds controlling. The goal is guidance, not control.`
+          },
+          {
+            text: `A friend`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Yes it feels friendly, but the video says something more specific than 'friend'.`
+          },
+          {
+            text: `A helpful expert`,
+            isCorrect: true,
+            feedbackTitle: `That's right!`,
+            feedbackBody: `This type of question demonstrates a genuine interest in the customer's needs, positioning you as someone who can provide the right solution.`
+          }
+        ],
+        explanation: `That CTA turns you into a helper and advisor. You're not just selling — you're diagnosing and recommending.`
+      },
+
+      {
+        text: `What is the core philosophy that makes the 'Perfect Reply Formula' effective?`,
+        options: [
+          {
+            text: `The best sale is driven by offering the lowest possible price.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `It's not about being the cheapest.`
+          },
+          {
+            text: `The best sale is the one that happens the fastest.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Speed is not the main goal.`
+          },
+          {
+            text: `The best sale uses psychological tricks to confuse the customer.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `The formula is the opposite of manipulation.`
+          },
+          {
+            text: `The best sale feels less like a transaction and more like a helpful conversation.`,
+            isCorrect: true,
+            feedbackTitle: `That's right!`,
+            feedbackBody: `This aligns directly with the quote from the video, emphasizing that the sale becomes a natural outcome of helping someone solve a problem.`
+          }
+        ],
+        explanation: `You're not pushing a sale. You're having a useful conversation that makes buying feel natural.`
+      },
+
+      {
+        text: `Why is it important to never skip the greeting, even if it's just a simple 'Hello'?`,
+        options: [
+          {
+            text: `It proves that the message is not from an automated bot.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Yes it feels human, but the main point is respect, not bot detection.`
+          },
+          {
+            text: `It's a basic human courtesy that shows you see a person, not just a sale.`,
+            isCorrect: true,
+            feedbackTitle: `That's right!`,
+            feedbackBody: `This simple act of acknowledgement is the first step in building a relationship and treating the potential customer with respect.`
+          },
+          {
+            text: `It confirms that you have received the customer's message.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Confirmation helps, but the lesson focused on respect and relationship.`
+          },
+          {
+            text: `It is required by messaging platform algorithms.`,
+            isCorrect: false,
+            feedbackTitle: `Not quite`,
+            feedbackBody: `Algorithms were not the reason given.`
+          }
+        ],
+        explanation: `Starting with a greeting shows basic respect. You’re treating them like a human, not just a target.`
+      }
+    ];
+
+    /**********************************************************
+     * STATE
+     **********************************************************/
+    let currentQuestion = 0;
+    let userAnswers = new Array(quizData.length).fill(null);     // chosen option index
+    let questionLocked = new Array(quizData.length).fill(false); // after click = locked
+
+    /**********************************************************
+     * DOM ELEMENTS
+     **********************************************************/
+    const questionCountEl   = document.getElementById("question-count");
+    const questionTextEl    = document.getElementById("question-text");
+    const optionsAreaEl     = document.getElementById("options-area");
+    const nextBtn           = document.getElementById("next-btn");
+    const prevBtn           = document.getElementById("prev-btn");
+    const scoreTempNumber   = document.getElementById("score-temp-number");
+    const progressBar       = document.getElementById("progress-bar");
+
+    const resultsSection    = document.getElementById("results-section");
+    const finalScoreEl      = document.getElementById("final-score");
+    const reviewAreaEl      = document.getElementById("review-area");
+    const restartBtn        = document.getElementById("restart-btn");
+    const scrollTopBtn      = document.getElementById("scroll-top-btn");
+
+    /**********************************************************
+     * HELPERS
+     **********************************************************/
+    function calcTempScore() {
+      let s = 0;
+      quizData.forEach((q, i) => {
+        if (userAnswers[i] !== null) {
+          const chosen = userAnswers[i];
+          if (q.options[chosen].isCorrect) s++;
+        }
+      });
+      return s;
+    }
+
+    function lockCurrentQuestion(chosenIdx) {
+      userAnswers[currentQuestion] = chosenIdx;
+      questionLocked[currentQuestion] = true;
+      renderQuestion();
+    }
+
+    /**********************************************************
+     * RENDER QUESTION
+     **********************************************************/
+    function renderQuestion() {
+      const q = quizData[currentQuestion];
+
+      // header / progress
+      questionCountEl.textContent = `Question ${currentQuestion + 1} / ${quizData.length}`;
+      const pct = (currentQuestion / quizData.length) * 100;
+      progressBar.style.width = pct + "%";
+
+      // question text
+      questionTextEl.textContent = q.text;
+
+      // answers
+      optionsAreaEl.innerHTML = "";
+      const locked = questionLocked[currentQuestion];
+      const chosen = userAnswers[currentQuestion];
+
+      q.options.forEach((opt, idx) => {
+        // base button style
+        let baseClasses =
+          "block w-full text-left border rounded-xl p-4 text-gray-800 transition relative";
+
+        if (!locked) {
+          // before answer is chosen
+          baseClasses += " cursor-pointer hover:bg-indigo-50 hover:border-indigo-400";
+          if (chosen === idx) {
+            baseClasses += " border-indigo-500 bg-indigo-50";
+          } else {
+            baseClasses += " border-gray-300 bg-white";
+          }
+        } else {
+          // after answer is chosen -> lock visuals
+          if (opt.isCorrect && chosen === idx) {
+            // user chose correct
+            baseClasses += " option-correct border-2";
+          } else if (!opt.isCorrect && chosen === idx) {
+            // user chose wrong
+            baseClasses += " option-wrong border-2";
+          } else if (opt.isCorrect && chosen !== idx) {
+            // show correct
+            baseClasses += " option-correct border";
+          } else {
+            // neutral others
+            baseClasses += " option-neutral border";
+          }
+          baseClasses += " option-disabled";
+        }
+
+        const wrapperBtn = document.createElement("button");
+        wrapperBtn.className = baseClasses;
+        wrapperBtn.disabled = locked;
+
+        wrapperBtn.innerHTML = `
+          <div class="flex items-start gap-3 text-left">
+            <div class="font-semibold ${
+              locked
+                ? (opt.isCorrect
+                    ? "text-green-700"
+                    : (chosen === idx && !opt.isCorrect ? "text-red-700" : "text-gray-500"))
+                : "text-indigo-600"
+            }">
+              ${String.fromCharCode(65 + idx)}.
+            </div>
+            <div class="flex-1 text-left text-[15px] leading-relaxed text-gray-900">
+              ${opt.text}
+            </div>
+          </div>
+        `;
+
+        // click to lock the answer
+        if (!locked) {
+          wrapperBtn.addEventListener("click", () => {
+            lockCurrentQuestion(idx);
+          });
+        }
+
+        optionsAreaEl.appendChild(wrapperBtn);
+
+        // feedback block after locked:
+        if (locked) {
+          const isChosen = chosen === idx;
+          const isCorrect = opt.isCorrect;
+          const userWasWrong = chosen !== null && !q.options[chosen].isCorrect;
+
+          // show feedback if:
+          // - this was the chosen answer, OR
+          // - this is the correct answer and user was wrong
+          if (isChosen || (isCorrect && userWasWrong)) {
+            const fb = document.createElement("div");
+
+            fb.className =
+              "mt-3 text-sm leading-relaxed rounded-xl border p-3 " +
+              (isCorrect
+                ? "bg-green-50 border-green-200 text-green-800"
+                : "bg-red-50 border-red-200 text-red-800");
+
+            fb.innerHTML = `
+              <div class="font-semibold mb-1 flex items-center gap-2">
+                <span>${opt.feedbackTitle || (isCorrect ? "Correct" : "Not quite")}</span>
+                ${
+                  isCorrect
+                    ? '<span class="text-green-600">✓</span>'
+                    : '<span class="text-red-600">✕</span>'
+                }
+              </div>
+              <div class="text-[13px] leading-relaxed text-current">
+                ${opt.feedbackBody || ""}
+              </div>
+            `;
+
+            optionsAreaEl.appendChild(fb);
+          }
+        }
+      });
+
+      // nav buttons
+      prevBtn.disabled = currentQuestion === 0;
+      nextBtn.textContent =
+        currentQuestion === quizData.length - 1 ? "Finish ✔" : "Next →";
+
+      // live score
+      scoreTempNumber.textContent = `${calcTempScore()} / ${quizData.length}`;
+
+      // hide results section if we navigated back
+      resultsSection.classList.add("hidden");
+    }
+
+    /**********************************************************
+     * RENDER RESULTS
+     **********************************************************/
+    function renderResults() {
+      const totalCorrect = calcTempScore();
+      finalScoreEl.textContent = `${totalCorrect} / ${quizData.length}`;
+
+      progressBar.style.width = "100%";
+
+      // detailed review
+      reviewAreaEl.innerHTML = "";
+      quizData.forEach((q, i) => {
+        const chosen = userAnswers[i];
+
+        const qCard = document.createElement("div");
+        qCard.className = "border border-gray-200 rounded-xl p-4";
+
+        const qTitle = document.createElement("div");
+        qTitle.className = "text-base font-semibold text-gray-900 mb-2";
+        qTitle.textContent = `${i + 1}. ${q.text}`;
+        qCard.appendChild(qTitle);
+
+        q.options.forEach((opt, idx) => {
+          let reviewClasses =
+            "block w-full text-left border rounded-xl p-3 text-sm mb-2";
+
+          if (opt.isCorrect && chosen === idx) {
+            // chose correct
+            reviewClasses += " option-correct border-2";
+          } else if (opt.isCorrect && chosen !== idx) {
+            // correct answer (not chosen)
+            reviewClasses += " option-correct border";
+          } else if (!opt.isCorrect && chosen === idx) {
+            // chose wrong
+            reviewClasses += " option-wrong border-2";
+          } else {
+            reviewClasses += " border-gray-300 bg-white";
+          }
+
+          const optDiv = document.createElement("div");
+          optDiv.className = reviewClasses;
+          optDiv.innerHTML = `
+            <div class="flex items-start gap-2">
+              <div class="font-semibold">${String.fromCharCode(65 + idx)}.</div>
+              <div class="flex-1">${opt.text}</div>
+            </div>
+          `;
+          qCard.appendChild(optDiv);
+        });
+
+        if (q.explanation) {
+          const exp = document.createElement("div");
+          exp.className =
+            "mt-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-3";
+          exp.innerHTML =
+            "<span class='font-semibold text-gray-900'>Why this matters:</span> " +
+            q.explanation;
+          qCard.appendChild(exp);
+        }
+
+        reviewAreaEl.appendChild(qCard);
+      });
+
+      resultsSection.classList.remove("hidden");
+      resultsSection.scrollIntoView({ behavior: "smooth" });
+    }
+
+    /**********************************************************
+     * EVENTS
+     **********************************************************/
+    nextBtn.addEventListener("click", () => {
+      if (currentQuestion === quizData.length - 1) {
+        renderResults();
+        return;
+      }
+      currentQuestion++;
+      renderQuestion();
+    });
+
+    prevBtn.addEventListener("click", () => {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion();
+      }
+    });
+
+    restartBtn.addEventListener("click", () => {
+      userAnswers = new Array(quizData.length).fill(null);
+      questionLocked = new Array(quizData.length).fill(false);
+      currentQuestion = 0;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      renderQuestion();
+    });
+
+    scrollTopBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    /**********************************************************
+     * INIT
+     **********************************************************/
+    renderQuestion();
+  </script>
+</body>
+</html>
