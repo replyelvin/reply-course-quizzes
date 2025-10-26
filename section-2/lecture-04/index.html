@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Section 2 · Lecture 4 Quiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .hidden{display:none}
+    .option-disabled{opacity:.6;cursor:default}
+    .option-correct{background:#dcfce7;border-color:#16a34a!important}
+    .option-wrong{background:#fee2e2;border-color:#dc2626!important}
+    .option-neutral{background:#f9fafb;border-color:#e5e7eb!important}
+  </style>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+  <div class="w-full max-w-2xl">
+    <div class="bg-white shadow-xl rounded-2xl p-6 md:p-8">
+      <div class="flex flex-col gap-2 mb-6">
+        <h1 class="text-xl font-semibold text-gray-900">Section 2 • Lecture 4 — Sales Psychology & Bundling Quiz</h1>
+        <div class="flex items-center justify-between text-sm text-gray-500">
+          <div id="qcount">Question 1 / 8</div>
+          <div>Score: <span id="score">0</span></div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div id="bar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <p id="qtext" class="text-lg font-medium text-gray-900 mb-6"></p>
+      <div id="opts" class="flex flex-col gap-3 mb-6"></div>
+
+      <div class="flex items-center justify-between">
+        <button id="prev" class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed">← Back</button>
+        <button id="next" class="px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white shadow hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed">Next →</button>
+      </div>
+
+      <div id="results" class="hidden mt-10 border-t pt-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">Your Result</h2>
+        <p class="text-gray-700 mb-4">Score: <span id="final"></span></p>
+        <div class="text-sm text-gray-500 mb-4">Green = correct. Red = your wrong choice (if any).</div>
+        <div id="review" class="space-y-6"></div>
+        <div class="mt-8 flex gap-3">
+          <button id="restart" class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200">Restart quiz</button>
+          <button id="top" class="px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white shadow hover:bg-indigo-700">Back to top ↑</button>
+        </div>
+      </div>
+    </div>
+    <p class="text-center text-[11px] text-gray-400 mt-4">Practice quiz — not graded by Udemy.</p>
+  </div>
+
+  <script>
+    // ---------- QUIZ DATA ----------
+    const quiz = [
+      {
+        text: "According to the video, what is the primary psychological effect the 'I got ahead feeling' tactic aims to create in a customer?",
+        options: [
+          { text: "A sense of pressure to buy more items than originally intended.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "Pressure harms trust; this tactic is about perceived gain." },
+          { text: "A sense of victory from the perceived savings on a bundled package.", isCorrect: true, feedbackTitle: "That's right!", feedbackBody: "It shifts attention to the amount saved, so the buyer feels they’ve secured a special deal." },
+          { text: "A feeling of gratitude for a simple price reduction on one item.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "The focus is on a bundle win, not a single-item discount." },
+          { text: "A feeling of confusion about the total cost of their purchase.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "Confusion kills conversions—the tactic relies on a clear, positive win." }
+        ],
+        explanation: "The 'I got ahead feeling' frames a bundle so the customer celebrates the savings and feels they’ve won."
+      },
+      {
+        text: "When a customer asks for a 10% discount on an expensive laptop, what is the least effective initial response described in the video?",
+        options: [
+          { text: "Offering the discount on the condition that they purchase other items.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "This can be part of a strategic approach tied to accessories." },
+          { text: "Pivoting the conversation to ask about necessary accessories.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "This keeps momentum and opens value-building options." },
+          { text: "Immediately defending the price by highlighting the laptop's quality.", isCorrect: true, feedbackTitle: "That's right!", feedbackBody: "If they’re asking for a discount, they already want it—defending the price first is unnecessary and ineffective." },
+          { text: "Acknowledging their choice and exploring how to enhance their experience.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "That response keeps the dialog collaborative." }
+        ],
+        explanation: "Don’t start by arguing price; instead, reframe and build value."
+      },
+      {
+        text: "What is the core principle of the 'strategic discount' tactic for high-value items?",
+        options: [
+          { text: "Providing a small, predetermined discount to any customer who asks.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "That just cuts margin without increasing the sale’s total value." },
+          { text: "Slashing the price of the main item to close the sale quickly.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "Deep cuts reduce perceived value and erode profit." },
+          { text: "Offering a discount on the main item contingent on the purchase of accessories.", isCorrect: true, feedbackTitle: "Right answer", feedbackBody: "Customer gets the discount they want on the big item while total revenue increases with add-ons." },
+          { text: "Bundling several low-cost items together for a single package price.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "Bundling is useful, but the tactic here ties the big-item discount to accessories." }
+        ],
+        explanation: "Trade a controlled discount for a larger, more valuable overall basket."
+      },
+      {
+        text: "In the phone bundle example ($300 phone + $95 accessories offered for $75), what does the customer's brain typically focus on?",
+        options: [
+          { text: "The original $95 price of the accessories.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "The anchor matters, but the felt win is the savings." },
+          { text: "The $20 they saved on the accessories.", isCorrect: true, feedbackTitle: "That's right!", feedbackBody: "The brain zeroes in on the savings, creating a strong sense of having 'won'." },
+          { text: "The new total cost of $375.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "Totals recede when the deal feels like a win." },
+          { text: "The fact they just spent $75 more than planned for the phone.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "The perceived savings dominates that feeling." }
+        ],
+        explanation: "Perceived savings outruns total-spend awareness in a well-framed bundle."
+      },
+      {
+        text: "What is described as the primary long-term benefit of pairing a product with a complementary service, like a camera with a photography course?",
+        options: [
+          { text: "It builds an 'ecosystem' around the customer, fostering loyalty.", isCorrect: true, feedbackTitle: "Right answer", feedbackBody: "By becoming a partner in the experience, you create a relationship beyond a single transaction." },
+          { text: "It is the only effective way to sell high-cost services.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "It’s powerful, but not the only approach." },
+          { text: "It eliminates the need for the customer to shop at competing stores.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "It may reduce shopping around, but the key benefit is the stronger relationship." },
+          { text: "It significantly increases the profit margin on the initial product sale.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "Margins may improve, but the emphasis is long-term loyalty." }
+        ],
+        explanation: "Product + service builds a lasting relationship ‘ecosystem’ around the buyer."
+      },
+      {
+        text: "To illustrate the flexibility of these cross-selling principles, which example was provided for the hotel industry?",
+        options: [
+          { text: "Giving a discount for booking non-refundable rooms far in advance.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "That’s a pricing tactic, not the product+service bundle example." },
+          { text: "Partnering with a local restaurant to offer dinner vouchers.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "Useful, but the video’s example bunded a service to the stay itself." },
+          { text: "Pairing a room booking with a discounted spa credit.", isCorrect: true, feedbackTitle: "Right answer", feedbackBody: "Turns a simple stay into a complete experience by bundling the room (product) with a spa treatment (service)." },
+          { text: "Offering a free night's stay after a certain number of paid nights.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "That’s a loyalty reward, not a single-stay bundle." }
+        ],
+        explanation: "A product + service combo can elevate an ordinary purchase into a memorable experience."
+      },
+      {
+        text: "What is the fundamental question the video suggests a salesperson should ask themselves when a customer requests a discount?",
+        options: [
+          { text: "Is this customer just trying to get the lowest possible price?", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "This mindset keeps you stuck on price instead of value." },
+          { text: "What else does this person need to be successful with their purchase?", isCorrect: true, feedbackTitle: "That's right!", feedbackBody: "Reframe to problem-solving and build a complete solution for the customer." },
+          { text: "Why do they think my price is too high for this item?", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "Better to redirect to outcomes and success." },
+          { text: "How much profit margin can I afford to lose on this sale?", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "Don’t start from concession—start from added value." }
+        ],
+        explanation: "Asking about customer success opens cross-sell/upsell paths and keeps momentum."
+      },
+      {
+        text: "In the scenario of selling a motorcycle, offering discounted riding lessons is an example of which powerful strategy?",
+        options: [
+          { text: "The 'strategic discount' on a big-ticket item.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "That tactic ties discounts to accessories; here it’s product + service." },
+          { text: "Pairing a product with a complementary service.", isCorrect: true, feedbackTitle: "That's right!", feedbackBody: "The lessons build an ecosystem and position you as a partner in the customer’s experience." },
+          { text: "The 'I got ahead feeling' bundle.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "That tactic focuses on perceived savings on a bundle, not education/service pairing." },
+          { text: "A standard price defense strategy.", isCorrect: false, feedbackTitle: "Not quite", feedbackBody: "No price defense here—this is value expansion." }
+        ],
+        explanation: "Bundling a complementary service deepens value and loyalty beyond the initial purchase."
+      }
+    ];
+
+    // ---------- QUIZ ENGINE ----------
+    let i = 0;
+    const chosen = Array(quiz.length).fill(null);
+    const locked = Array(quiz.length).fill(false);
+
+    const qtext = document.getElementById("qtext");
+    const opts = document.getElementById("opts");
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    const bar = document.getElementById("bar");
+    const qcount = document.getElementById("qcount");
+    const scoreSpan = document.getElementById("score");
+
+    const results = document.getElementById("results");
+    const finalEl = document.getElementById("final");
+    const review = document.getElementById("review");
+    const restart = document.getElementById("restart");
+    const topBtn = document.getElementById("top");
+
+    function tempScore(){
+      return chosen.reduce((s, c, idx)=> s + (c!==null && quiz[idx].options[c].isCorrect ? 1:0), 0);
+    }
+
+    function render(){
+      const q = quiz[i];
+      qtext.textContent = q.text;
+      qcount.textContent = `Question ${i+1} / ${quiz.length}`;
+      bar.style.width = (i/quiz.length*100) + "%";
+      scoreSpan.textContent = `${tempScore()} / ${quiz.length}`;
+
+      const isLocked = locked[i];
+      const picked = chosen[i];
+
+      opts.innerHTML = "";
+      q.options.forEach((o, idx)=>{
+        let cls = "block w-full text-left border rounded-xl p-4 text-gray-800 transition relative";
+        if(!isLocked){
+          cls += " cursor-pointer hover:bg-indigo-50 hover:border-indigo-400";
+          cls += picked===idx ? " border-indigo-500 bg-indigo-50" : " border-gray-300 bg-white";
+        }else{
+          if(o.isCorrect && picked===idx) cls += " option-correct border-2";
+          else if(!o.isCorrect && picked===idx) cls += " option-wrong border-2";
+          else if(o.isCorrect) cls += " option-correct border";
+          else cls += " option-neutral border";
+          cls += " option-disabled";
+        }
+
+        const btn = document.createElement("button");
+        btn.className = cls;
+        btn.disabled = isLocked;
+        btn.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="font-semibold ${isLocked ? (o.isCorrect ? 'text-green-700' : (picked===idx ? 'text-red-700' : 'text-gray-500')) : 'text-indigo-600'}">
+              ${String.fromCharCode(65+idx)}.
+            </div>
+            <div class="flex-1 text-left text-[15px] leading-relaxed text-gray-900">${o.text}</div>
+          </div>
+        `;
+        if(!isLocked){
+          btn.addEventListener("click", ()=>{ chosen[i]=idx; locked[i]=true; render(); });
+        }
+        opts.appendChild(btn);
+
+        if(isLocked){
+          const userWrong = picked!==null && !q.options[picked].isCorrect;
+          if(picked===idx || (o.isCorrect && userWrong)){
+            const fb = document.createElement("div");
+            fb.className = "mt-3 text-sm leading-relaxed rounded-xl border p-3 " + (o.isCorrect ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800");
+            fb.innerHTML = `
+              <div class="font-semibold mb-1 flex items-center gap-2">
+                <span>${o.feedbackTitle || (o.isCorrect ? "Correct" : "Not quite")}</span>
+                ${o.isCorrect ? '<span class="text-green-600">✓</span>' : '<span class="text-red-600">✕</span>'}
+              </div>
+              <div class="text-[13px]">${o.feedbackBody || ""}</div>
+            `;
+            opts.appendChild(fb);
+          }
+        }
+      });
+
+      prev.disabled = i===0;
+      next.textContent = i===quiz.length-1 ? "Finish ✔" : "Next →";
+      results.classList.add("hidden");
+    }
+
+    function renderResults(){
+      finalEl.textContent = `${tempScore()} / ${quiz.length}`;
+      bar.style.width = "100%";
+      review.innerHTML = "";
+      quiz.forEach((q, qi)=>{
+        const card = document.createElement("div");
+        card.className = "border border-gray-200 rounded-xl p-4";
+        const title = document.createElement("div");
+        title.className = "text-base font-semibold text-gray-900 mb-2";
+        title.textContent = `${qi+1}. ${q.text}`;
+        card.appendChild(title);
+
+        q.options.forEach((o, oi)=>{
+          let c = "block w-full text-left border rounded-xl p-3 text-sm mb-2";
+          if(o.isCorrect && chosen[qi]===oi) c += " option-correct border-2";
+          else if(o.isCorrect) c += " option-correct border";
+          else if(!o.isCorrect && chosen[qi]===oi) c += " option-wrong border-2";
+          else c += " border-gray-300 bg-white";
+          const row = document.createElement("div");
+          row.className = c;
+          row.innerHTML = `<div class="flex items-start gap-2"><div class="font-semibold">${String.fromCharCode(65+oi)}.</div><div class="flex-1">${o.text}</div></div>`;
+          card.appendChild(row);
+        });
+
+        if(q.explanation){
+          const exp = document.createElement("div");
+          exp.className = "mt-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-3";
+          exp.innerHTML = "<span class='font-semibold text-gray-900'>Why this matters:</span> " + q.explanation;
+          card.appendChild(exp);
+        }
+
+        review.appendChild(card);
+      });
+      results.classList.remove("hidden");
+      results.scrollIntoView({behavior:"smooth"});
+    }
+
+    // events
+    next.addEventListener("click", ()=>{ if(i===quiz.length-1){renderResults();return;} i++; render(); });
+    prev.addEventListener("click", ()=>{ if(i>0){ i--; render(); }});
+    document.getElementById("restart").addEventListener("click", ()=>{
+      for(let k=0;k<quiz.length;k++){ chosen[k]=null; locked[k]=false; }
+      i=0; window.scrollTo({top:0,behavior:"smooth"}); render();
+    });
+    document.getElementById("top").addEventListener("click", ()=> window.scrollTo({top:0,behavior:"smooth"}));
+
+    // init
+    render();
+  </script>
+</body>
+</html>
